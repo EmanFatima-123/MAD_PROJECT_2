@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "499498430328",
+    "project_id": "quickfit-f72ad",
+    "storage_bucket": "quickfit-f72ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:499498430328:android:7bb76e615b8b60943ea28d",
+        "android_client_info": {
+          "package_name": "com.example.fitness_splash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFfXfHaSV_awEmosl7K3XsdFz-P7ZSCGw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
