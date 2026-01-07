@@ -1,6 +1,7 @@
 package com.example.fitness_splash;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,35 +11,58 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class WorkoutAdapter extends ArrayAdapter<String> {
+public class WorkoutAdapter
+        extends RecyclerView.Adapter<WorkoutAdapter.ViewHolder> {
+
 
     Context context;
-    List<String> workouts;
-    int[] icons;
 
-    public WorkoutAdapter(Context c, List<String> workouts, int[] icons) {
-        super(c, R.layout.list_item, workouts);
-        this.context = c;
-        this.workouts = workouts;
-        this.icons = icons;
+    List<String> workouts;
+    int[] images;
+
+    public WorkoutAdapter(Context c, List<String> w, int[] i) {
+        context = c;
+        workouts = w;
+        images = i;
     }
 
-    @NonNull
+    class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView img;
+        TextView txt;
+
+        ViewHolder(View v) {
+            super(v);
+            img = v.findViewById(R.id.imgWorkout);
+            txt = v.findViewById(R.id.txtWorkout);
+        }
+    }
+
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(context)
+                .inflate(R.layout.list_item, parent, false);
+        return new ViewHolder(v);
+    }
 
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View row = inflater.inflate(R.layout.list_item, parent, false);
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.txt.setText(workouts.get(position));
+        holder.img.setImageResource(images[position]);
 
-        ImageView icon = row.findViewById(R.id.itemIcon);
-        TextView title = row.findViewById(R.id.itemText);
+        holder.itemView.setOnClickListener(v -> {
+            Intent i = new Intent(context, activity_mode.class);
+            i.putExtra("workout_name", workouts.get(position));
+            context.startActivity(i);
+        });
+    }
 
-        icon.setImageResource(icons[position]);
-        title.setText(workouts.get(position));
-
-        return row;
+    @Override
+    public int getItemCount() {
+        return workouts.size();
+    }
 }
-}
+

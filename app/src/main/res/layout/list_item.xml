@@ -1,22 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="6dp"
+    android:background="#4FABA9"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:elevation="2dp"
+    android:clipToPadding="false"
+    android:gravity="center">
 
     <ImageView
-        android:id="@+id/itemIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginRight="16dp"
-        android:src="@drawable/ic_launcher_foreground"/>
+        android:id="@+id/imgWorkout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:background="@android:color/white"
+        android:contentDescription="Workout Image"/>
 
     <TextView
-        android:id="@+id/itemText"
-        android:textSize="18sp"
-        android:textColor="#000"
+        android:id="@+id/txtWorkout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:paddingTop="6dp"/>
 </LinearLayout>

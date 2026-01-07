@@ -1,43 +1,43 @@
 package com.example.fitness_splash;
 
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class home extends AppCompatActivity {
 
-    ListView listViewWorkouts;
-    Button btnOpenMain;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    RecyclerView recyclerView;
+    ImageView btnMenu;
 
     List<String> workouts;
-
-    int[] icons = {
-            R.drawable.chestlogo,
-            R.drawable.armslogo,
-            R.drawable.legslogo,
-            R.drawable.backlogo,
-            R.drawable.shoulderslogo,
-            R.drawable.fullbodylogo,
-            R.drawable.yogalogo,
-            R.drawable.cardiologo,
-            R.drawable.deitlogo,
-            R.drawable.warmuplogo
-    };
+    int[] icons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        listViewWorkouts = findViewById(R.id.listViewWorkouts);
-        btnOpenMain = findViewById(R.id.btnOpenMain);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+        btnMenu = findViewById(R.id.btnMenu);
+        recyclerView = findViewById(R.id.recyclerWorkouts);
 
+        // Initialize data
         workouts = new ArrayList<>();
         workouts.add("Chest Workout");
         workouts.add("Arms Workout");
@@ -50,20 +50,49 @@ public class home extends AppCompatActivity {
         workouts.add("Diet Plan");
         workouts.add("Warm-up Routine");
 
+        icons = new int[]{
+                R.drawable.chestlogo,
+                R.drawable.armslogo,
+                R.drawable.legslogo,
+                R.drawable.backlogo,
+                R.drawable.shoulderslogo,
+                R.drawable.fullbodylogo,
+                R.drawable.yogalogo,
+                R.drawable.cardiologo,
+                R.drawable.deitlogo,
+                R.drawable.warmuplogo
+        };
+
+        // Menu button click
+        btnMenu.setOnClickListener(v ->
+                drawerLayout.openDrawer(GravityCompat.START));
+
+        // RecyclerView setup
+        recyclerView.setLayoutManager(
+                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+
         WorkoutAdapter adapter = new WorkoutAdapter(this, workouts, icons);
-        listViewWorkouts.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
-        listViewWorkouts.setOnItemClickListener((parent, view, position, id) -> {
+        // Navigation drawer item click
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_mode) {
+                startActivity(new Intent(this, activity_mode.class));
+            } else if (id == R.id.nav_user) {
+                startActivity(new Intent(this, datasending.class));
+            } else if (id == R.id.nav_qr) {
+                startActivity(new Intent(this, qrscanner.class));
+            } else if (id == R.id.nav_logout) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(this, login.class));
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
 
-            String selectedWorkout = workouts.get(position);
-
-            Intent i = new Intent(home.this, activity_mode.class);
-            i.putExtra("workout_name", selectedWorkout);
-            startActivity(i);
+            return true;
         });
+    }
+}
 
-        btnOpenMain.setOnClickListener(v -> {
-            startActivity(new Intent(home.this, MainActivity.class));
-   });
-}
-}
+
+

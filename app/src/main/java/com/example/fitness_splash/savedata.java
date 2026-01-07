@@ -35,8 +35,8 @@ public class savedata extends AppCompatActivity {
 
 
         btnNext.setOnClickListener(v -> {
-            Intent intent = new Intent(savedata.this, last.class);
-            intent.putExtra("username", name); // pass data forward
+            Intent intent = new Intent(savedata.this, qrscanner.class);
+            intent.putExtra("username", name);
             intent.putExtra("age", age);
             startActivity(intent);
    });

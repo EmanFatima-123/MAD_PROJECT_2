@@ -1,44 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="24dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A7368">
+    android:background="#0A7368"
+    android:padding="24dp">
+
+
+    <ImageView
+        android:id="@+id/imgUser"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_user"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:contentDescription="User Image"
+        android:tint="#FFFFFF"/>
+
 
     <TextView
-        android:id="@+id/tvResult"
+        android:id="@+id/tvHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:text="User Information"
+        android:textSize="28sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
-        android:gravity="center"
-        android:padding="19dp"
-        android:text="Your Data Will Appear Here" />
+        android:layout_below="@id/imgUser"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"/>
 
-    <Button
-        android:id="@+id/btnBack"
-        android:layout_width="200dp"
+
+    <LinearLayout
+        android:id="@+id/detailsBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:backgroundTint="#03A9F4"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:layout_marginTop="30dp"/>
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:elevation="6dp"
+        android:padding="20dp"
+        android:layout_below="@id/tvHeader"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="#93C1C7"
+        android:clipToOutline="true"
+        android:outlineProvider="background">
 
-    <Button
-        android:id="@+id/btnNext"
-        android:layout_width="200dp"
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your data will appear here"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:gravity="center"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Next"
-        android:backgroundTint="#03A9F4"
-        android:textColor="#0B0A0A"
-        android:textSize="18sp"
-        android:padding="12dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
 
-        android:layout_marginTop="20dp"/>
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Back"
+            android:textSize="18sp"
+            android:backgroundTint="#93C1C7"
+            android:textColor="#000000"
+            android:padding="12dp"
+            android:layout_marginEnd="8dp"/>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Next"
+            android:textSize="18sp"
+            android:backgroundTint="#93C1C7"
+            android:textColor="#000000"
+            android:padding="12dp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+</RelativeLayout>

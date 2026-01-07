@@ -2,13 +2,43 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A7368">
+    android:background="#0A7368"
+    android:padding="24dp">
+
+
+    <ImageView
+        android:id="@+id/imgQR"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/scan"
+        android:scaleType="fitCenter"
+        android:layout_alignParentTop="true"/>
+
+
+    <TextView
+        android:id="@+id/tvInstruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Press button to scan QR"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_below="@id/imgQR"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"/>
+
 
     <Button
         android:id="@+id/btnScanQR"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
         android:text="Scan QR Code"
-        android:layout_centerInParent="true"/>
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/black"
+        android:layout_below="@id/tvInstruction"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:padding="14dp"/>
+
 </RelativeLayout>
