@@ -4,4 +4,5 @@
     <item android:id="@+id/nav_user" android:title="User Info"/>
     <item android:id="@+id/nav_qr" android:title="QR Scanner"/>
     <item android:id="@+id/nav_logout" android:title="Logout"/>
+    <item android:id="@+id/nav_ai" android:title="AI Chatbot"/>
 </menu>

@@ -86,6 +86,8 @@ public class home extends AppCompatActivity {
             } else if (id == R.id.nav_logout) {
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(this, login.class));
+            } else if (id == R.id.nav_ai) {
+                startActivity(new Intent(this, chatbot.class));
             }
             drawerLayout.closeDrawer(GravityCompat.START);
 
