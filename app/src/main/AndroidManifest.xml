@@ -20,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitness_splash">
         <activity
+            android:name=".chat"
+            android:exported="false" />
+        <activity
             android:name=".chatbot"
             android:exported="false" />
         <activity

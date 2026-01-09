@@ -88,6 +88,10 @@ public class home extends AppCompatActivity {
                 startActivity(new Intent(this, login.class));
             } else if (id == R.id.nav_ai) {
                 startActivity(new Intent(this, chatbot.class));
+            } else if (id == R.id.nav_chat) {
+                Intent intent = new Intent(home.this, chat.class);
+                intent.putExtra("receiverId", "OTHER_USER_UID");
+                startActivity(intent);
             }
             drawerLayout.closeDrawer(GravityCompat.START);
 

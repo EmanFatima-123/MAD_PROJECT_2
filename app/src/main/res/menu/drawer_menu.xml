@@ -5,4 +5,5 @@
     <item android:id="@+id/nav_qr" android:title="QR Scanner"/>
     <item android:id="@+id/nav_logout" android:title="Logout"/>
     <item android:id="@+id/nav_ai" android:title="AI Chatbot"/>
+    <item android:id="@+id/nav_chat" android:title="User Chat"/>
 </menu>

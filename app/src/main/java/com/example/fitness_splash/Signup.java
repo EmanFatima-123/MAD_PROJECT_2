@@ -20,75 +20,67 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class Signup extends AppCompatActivity {
+
     FirebaseAuth mAuth;
+    FirebaseFirestore firestore; // ✅ Add this
     EditText etName, etEmail, etPass;
     Button btnSignup;
     TextView alreadyHaveAcc;
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            Intent i1 = new Intent(getApplicationContext(), home.class);
-            startActivity(i1);
-            finish();
-        }
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_signup);
-        mAuth = FirebaseAuth.getInstance();
 
+        mAuth = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance(); // ✅ Initialize Firestore
 
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPass = findViewById(R.id.etPass);
-
         btnSignup = findViewById(R.id.Signupbtn);
         alreadyHaveAcc = findViewById(R.id.alreadyhaveaccounttxt);
 
         btnSignup.setOnClickListener(v -> {
-            String name = String.valueOf(etName.getText());
-            String email = String.valueOf(etEmail.getText());
-            String password = String.valueOf(etPass.getText());
+            String name = etName.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String password = etPass.getText().toString().trim();
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-
                 Toast.makeText(Signup.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
 
-                                Toast.makeText(Signup.this, "Account Created!.",
-                                        Toast.LENGTH_SHORT).show();
+                            String uid = mAuth.getCurrentUser().getUid();
 
+                            HashMap<String, Object> user = new HashMap<>();
+                            user.put("uid", uid);
+                            user.put("name", name); // username
+                            user.put("email", email);
 
-                            } else {
-                                // If sign in fails, display a message to the user.
+                            firestore.collection("users")  // ✅ Now it will work
+                                    .document(uid)
+                                    .set(user)
+                                    .addOnSuccessListener(unused -> {
+                                        Toast.makeText(Signup.this, "Signup Successful", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(Signup.this, home.class));
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(Signup.this, "Error saving user", Toast.LENGTH_SHORT).show());
 
-                                Toast.makeText(Signup.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-
-                            }
+                        } else {
+                            Toast.makeText(Signup.this, "Authentication failed", Toast.LENGTH_SHORT).show();
                         }
                     });
-
-
-
-            Toast.makeText(Signup.this, "Signup Successful", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(Signup.this, home.class));
         });
 
         alreadyHaveAcc.setOnClickListener(v ->
