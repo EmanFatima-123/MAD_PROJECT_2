@@ -1,9 +1,15 @@
 package com.example.fitness_splash;
 
-
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import androidx.annotation.NonNull;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -19,6 +25,7 @@ import java.util.List;
 
 public class home extends AppCompatActivity {
 
+    private InterstitialAd mInterstitialAd;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     RecyclerView recyclerView;
@@ -37,6 +44,11 @@ public class home extends AppCompatActivity {
         btnMenu = findViewById(R.id.btnMenu);
         recyclerView = findViewById(R.id.recyclerWorkouts);
 
+        // Ads ko start karein
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Ad ko background mein load karna shuru karein
+        loadMyAd();
         // Initialize data
         workouts = new ArrayList<>();
         workouts.add("Chest Workout");
@@ -92,11 +104,37 @@ public class home extends AppCompatActivity {
                 Intent intent = new Intent(home.this, chat.class);
                 intent.putExtra("receiverId", "OTHER_USER_UID");
                 startActivity(intent);
+            } else if (id == R.id.nav_ad) {
+                if (mInterstitialAd != null) {
+                    // Ad dikhao!
+                    mInterstitialAd.show(home.this);
+                    // Ad dikhne ke baad naya load kar lein taaki dobara bhi kaam kare
+                    loadMyAd();
+                } else {
+                    Toast.makeText(this, "Ad is still loading, please wait...", Toast.LENGTH_SHORT).show();
+                    loadMyAd(); // Phir se try karein
+                }
             }
             drawerLayout.closeDrawer(GravityCompat.START);
 
             return true;
         });
+    }
+
+    private void loadMyAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        // Test Interstitial Ad ID
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                    }
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mInterstitialAd = null;
+                    }
+                });
     }
 }
 
