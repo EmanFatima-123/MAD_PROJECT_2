@@ -9,8 +9,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class Signup extends AppCompatActivity {
+
+    DatabaseReference mDatabase;
     FirebaseAuth mAuth;
     EditText etName, etEmail, etPass;
     Button btnSignup;
@@ -32,6 +38,7 @@ public class Signup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
@@ -52,13 +59,35 @@ public class Signup extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(Signup.this, "Account Created!", Toast.LENGTH_SHORT).show();
-                            // Redirect to Home properly
-                            Intent intent = new Intent(Signup.this, home.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            // 1. Pehle user ki Unique ID nikalni hai
+                            String userId = mAuth.getCurrentUser().getUid();
+
+                            // 2. Database ka reference lena hai (Users naam ka folder banayenge)
+                            DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Users");
+
+                            // 3. User ka data aik jagah jama karna hai
+                            HashMap<String, String> userMap = new HashMap<>();
+                            userMap.put("name", name);  // Jo naam user ne type kiya
+                            userMap.put("email", email); // Jo email user ne type ki
+                            userMap.put("uid", userId);  // Firebase ki taraf se mili ID
+
+                            // 4. Database mein save karwana hai
+                            mDatabase.child(userId).setValue(userMap).addOnCompleteListener(dbTask -> {
+                                if (dbTask.isSuccessful()) {
+                                    // Jab database mein save ho jaye, tab Home par bhejna hai
+                                    Toast.makeText(Signup.this, "Account Created", Toast.LENGTH_SHORT).show();
+
+                                    Intent intent = new Intent(Signup.this, home.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(Signup.this, "Database Error: " + dbTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
                         } else {
+                            // Agar account hi na bane
                             Toast.makeText(Signup.this, "Signup Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });

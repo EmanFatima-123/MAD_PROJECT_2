@@ -104,7 +104,7 @@ public class home extends AppCompatActivity {
             } else if (id == R.id.nav_ai) {
                 startActivity(new Intent(this, chatbot.class));
             } else if (id == R.id.nav_chat) {
-                Intent intent = new Intent(home.this, chat.class);
+                Intent intent = new Intent(home.this, UsersListActivity.class);
                 intent.putExtra("receiverId", "OTHER_USER_UID");
                 startActivity(intent);
             } else if (id == R.id.nav_ad) {

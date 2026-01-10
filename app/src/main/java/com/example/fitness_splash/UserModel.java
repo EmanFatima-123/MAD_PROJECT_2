@@ -1,11 +1,10 @@
 package com.example.fitness_splash;
 
 public class UserModel {
-    public String uid;
-    public String name;
-    public String email;
+    public String uid, name, email;
 
-    public UserModel() {} // required for Firestore
+    // Khali constructor zaroori hai
+    public UserModel() {}
 
     public UserModel(String uid, String name, String email) {
         this.uid = uid;

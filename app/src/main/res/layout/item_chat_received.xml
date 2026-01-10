@@ -1,21 +1,32 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="start"
-    android:padding="8dp"
-    android:orientation="vertical">
-    <TextView
-        android:id="@+id/text_message_body"
+    android:padding="8dp">
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#E1E1E1"
-        android:textColor="#000000"
-        android:padding="12dp"
-        android:text="Received Message" />
-    <TextView
-        android:id="@+id/text_message_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="10sp"
-        android:text="12:00 PM" />
-</LinearLayout>
+        android:layout_alignParentLeft="true"
+        android:background="#E8E8E8"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:maxWidth="280dp">
+
+        <TextView
+            android:id="@+id/receiverMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello"
+            android:textColor="#000"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/receiverTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10:00 AM"
+            android:textSize="10sp"
+            android:layout_gravity="right" />
+    </LinearLayout>
+</RelativeLayout>

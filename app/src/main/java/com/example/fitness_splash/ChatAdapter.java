@@ -1,72 +1,83 @@
 package com.example.fitness_splash;
 
-import android.content.Context;
-import android.view.Gravity;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.google.firebase.auth.FirebaseAuth;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    Context context;
-    ArrayList<ChatMessage> list;
-    String currentUserId;
+    ArrayList<MessageModel> messageList;
+    int ITEM_SENT = 1;
+    int ITEM_RECEIVE = 2;
 
-    public ChatAdapter(Context context, ArrayList<ChatMessage> list, String currentUserId) {
-        this.context = context;
-        this.list = list;
-        this.currentUserId = currentUserId;
+    public ChatAdapter(ArrayList<MessageModel> messageList) {
+        this.messageList = messageList;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context)
-                .inflate(android.R.layout.simple_list_item_2, parent, false);
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        ChatMessage model = list.get(position);
-
-        // Show sender name + message
-        holder.senderName.setText(model.getSenderId().equals(currentUserId) ? "You" : "Friend");
-        holder.messageText.setText(model.getMessage());
-
-        // Align messages: current user right, other left
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.itemView.getLayoutParams();
-        if (model.getSenderId().equals(currentUserId)) {
-            params.gravity = Gravity.END;
-            holder.itemView.setLayoutParams(params);
-            holder.senderName.setGravity(Gravity.END);
-            holder.messageText.setGravity(Gravity.END);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == ITEM_SENT) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_sent, parent, false);
+            return new SenderViewHolder(view);
         } else {
-            params.gravity = Gravity.START;
-            holder.itemView.setLayoutParams(params);
-            holder.senderName.setGravity(Gravity.START);
-            holder.messageText.setGravity(Gravity.START);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_received, parent, false);
+            return new ReceiverViewHolder(view);
         }
     }
 
     @Override
-    public int getItemCount() {
-        return list.size();
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        MessageModel message = messageList.get(position);
+        String time = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date(message.timestamp));
+
+        if (holder.getClass() == SenderViewHolder.class) {
+            SenderViewHolder viewHolder = (SenderViewHolder) holder;
+            viewHolder.msg.setText(message.message);
+            viewHolder.time.setText(time);
+        } else {
+            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
+            viewHolder.msg.setText(message.message);
+            viewHolder.time.setText(time);
+        }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        TextView senderName, messageText;
+    @Override
+    public int getItemViewType(int position) {
+        if (FirebaseAuth.getInstance().getUid().equals(messageList.get(position).senderId)) {
+            return ITEM_SENT;
+        } else {
+            return ITEM_RECEIVE;
+        }
+    }
 
-        ViewHolder(View itemView) {
+    @Override
+    public int getItemCount() { return messageList.size(); }
+
+    public class SenderViewHolder extends RecyclerView.ViewHolder {
+        TextView msg, time;
+        public SenderViewHolder(@NonNull View itemView) {
             super(itemView);
-            senderName = itemView.findViewById(android.R.id.text1);
-            messageText = itemView.findViewById(android.R.id.text2);
+            msg = itemView.findViewById(R.id.senderMsg);
+            time = itemView.findViewById(R.id.senderTime);
+        }
+    }
+
+    public class ReceiverViewHolder extends RecyclerView.ViewHolder {
+        TextView msg, time;
+        public ReceiverViewHolder(@NonNull View itemView) {
+            super(itemView);
+            msg = itemView.findViewById(R.id.receiverMsg);
+            time = itemView.findViewById(R.id.receiverTime);
         }
     }
 }
-

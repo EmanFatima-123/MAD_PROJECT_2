@@ -2,117 +2,82 @@ package com.example.fitness_splash;
 
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class chat extends AppCompatActivity {
 
-    RecyclerView recyclerView;
-    EditText etMessage;
-    Button btnSend;
-
-    FirebaseFirestore firestore;
-    FirebaseAuth auth;
-
-    ArrayList<ChatMessage> messageList;
+    RecyclerView chatRv;
+    EditText msgEdit;
+    Button sendBtn;
     ChatAdapter adapter;
-
-    String senderId;
-    String receiverId;
-    String chatId;
+    ArrayList<MessageModel> list;
+    String senderRoom, receiverRoom;
+    DatabaseReference db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // UI
-        recyclerView = findViewById(R.id.chatRecycler);
-        etMessage = findViewById(R.id.etMessage);
-        btnSend = findViewById(R.id.btnSend);
+        chatRv = findViewById(R.id.chatRecyclerView);
+        msgEdit = findViewById(R.id.messageEdit);
+        sendBtn = findViewById(R.id.sendBtn);
 
-        // Firebase
-        firestore = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
+        String receiverId = getIntent().getStringExtra("receiverId");
+        String senderId = FirebaseAuth.getInstance().getUid();
 
-        senderId = auth.getCurrentUser().getUid();
-        receiverId = getIntent().getStringExtra("receiverId");
+        // Unique Chat Room IDs
+        senderRoom = senderId + receiverId;
+        receiverRoom = receiverId + senderId;
 
-        chatId = getChatId(senderId, receiverId);
+        list = new ArrayList<>();
+        adapter = new ChatAdapter(list);
+        chatRv.setLayoutManager(new LinearLayoutManager(this));
+        chatRv.setAdapter(adapter);
 
-        // DEBUG (pehle run me dekh lena)
-        Log.d("CHAT_DEBUG", "Sender: " + senderId);
-        Log.d("CHAT_DEBUG", "Receiver: " + receiverId);
-        Log.d("CHAT_DEBUG", "ChatId: " + chatId);
+        db = FirebaseDatabase.getInstance().getReference("Chats");
 
-        messageList = new ArrayList<>();
-        adapter = new ChatAdapter(this, messageList, senderId);
+        // --- Messages Receive Karna ---
+        db.child(senderRoom).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                list.clear();
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    MessageModel model = ds.getValue(MessageModel.class);
+                    list.add(model);
+                }
+                adapter.notifyDataSetChanged();
+                chatRv.scrollToPosition(list.size() - 1); // Scroll to bottom
+            }
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
 
-        loadMessages();
+        // --- Message Send Karna ---
+        sendBtn.setOnClickListener(v -> {
+            String messageText = msgEdit.getText().toString();
+            if (!messageText.isEmpty()) {
+                MessageModel model = new MessageModel(messageText, senderId, System.currentTimeMillis());
 
-        btnSend.setOnClickListener(v -> sendMessage());
-    }
-
-    // 🔑 SAME chatId for both users
-    private String getChatId(String u1, String u2) {
-        if (u1.compareTo(u2) < 0)
-            return u1 + "_" + u2;
-        else
-            return u2 + "_" + u1;
-    }
-
-    private void sendMessage() {
-        String msg = etMessage.getText().toString().trim();
-        if (msg.isEmpty()) return;
-
-        ChatMessage model = new ChatMessage(
-                senderId,
-                receiverId,
-                msg,
-                System.currentTimeMillis()
-        );
-
-        firestore.collection("messages")
-                .document(chatId)
-                .collection("chats")
-                .add(model);
-
-        etMessage.setText("");
-    }
-
-    private void loadMessages() {
-        firestore.collection("messages")
-                .document(chatId)
-                .collection("chats")
-                .orderBy("timestamp", Query.Direction.ASCENDING)
-                .addSnapshotListener((value, error) -> {
-
-                    if (value == null) return;
-
-                    messageList.clear();
-
-                    for (DocumentSnapshot doc : value.getDocuments()) {
-                        ChatMessage message = doc.toObject(ChatMessage.class);
-                        messageList.add(message);
-                    }
-
-                    adapter.notifyDataSetChanged();
-                    recyclerView.scrollToPosition(messageList.size() - 1);
+                db.child(senderRoom).push().setValue(model).addOnSuccessListener(unused -> {
+                    db.child(receiverRoom).push().setValue(model);
                 });
+
+                msgEdit.setText(""); // Clear input
+            }
+        });
     }
 }
