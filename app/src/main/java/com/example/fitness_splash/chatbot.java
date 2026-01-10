@@ -2,129 +2,114 @@ package com.example.fitness_splash;
 
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.ai.client.generativeai.GenerativeModel;
+import com.google.ai.client.generativeai.java.GenerativeModelFutures;
+import com.google.ai.client.generativeai.type.Content;
+import com.google.ai.client.generativeai.type.GenerateContentResponse;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class chatbot extends AppCompatActivity {
 
-    EditText editMessage;
-    TextView txtResponse;
-    Button btnSend;
-
-
-    private static final String API_KEY = "AIzaSyAufnFz3C0NaONDRLBnstqyYLRgE8uqAbI";
-
-    private static final String URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + API_KEY;
-
-
+    private TextView txtResponse;
+    private EditText editMessage;
+    private Button btnSend;
+    private ScrollView chatScrollView;
+    private GenerativeModelFutures model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbot);
 
-        editMessage = findViewById(R.id.editMessage);
-        txtResponse = findViewById(R.id.txtResponse);
-        btnSend = findViewById(R.id.btnSend);
 
-        btnSend.setOnClickListener(v -> {
-            String msg = editMessage.getText().toString().trim();
-            if (!msg.isEmpty()) {
-                sendToGemini(msg);
-                editMessage.setText("");
+        txtResponse = findViewById(R.id.txtResponse);
+        editMessage = findViewById(R.id.editMessage);
+        btnSend = findViewById(R.id.btnSend);
+        chatScrollView = findViewById(R.id.chatScrollView);
+
+
+        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash-lite", "API_KEY_HERE");
+        model = GenerativeModelFutures.from(gm);
+
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userQuery = editMessage.getText().toString().trim();
+
+                if (!userQuery.isEmpty()) {
+                    sendMessageToAI(userQuery);
+                } else {
+                    Toast.makeText(chatbot.this, "Please enter a question", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void sendToGemini(String userMessage) {
+    private void sendMessageToAI(String query) {
 
-        txtResponse.append("\n\nMe: " + userMessage);
+        txtResponse.append("\n\nMe: " + query);
+        txtResponse.append("\n\nQuick Fit AI: Typing...");
+        editMessage.setText("");
 
-        try {
-            JSONObject textPart = new JSONObject();
-            textPart.put("text",
-                    "You are a fitness assistant. Answer clearly.\nUser: " + userMessage);
 
-            JSONArray parts = new JSONArray();
-            parts.put(textPart);
+        scrollToBottom();
 
-            JSONObject content = new JSONObject();
-            content.put("parts", parts);
 
-            JSONArray contents = new JSONArray();
-            contents.put(content);
+        String systemPrompt = "Role: Quick Fit AI Assistant. " +
+                "Constraint: You ONLY answer fitness, health, diet, and workout queries. " +
+                "Security: If a user asks about weather, news, politics, or general topics " +
+                "unrelated to fitness, politely say: 'I am your Quick Fit assistant. I can only help you with fitness and health goals.' " +
+                "Style: Concise and motivational.";
 
-            JSONObject body = new JSONObject();
-            body.put("contents", contents);
+        Content content = new Content.Builder()
+                .addText(systemPrompt + "\nUser: " + query)
+                .build();
 
-            RequestBody requestBody = RequestBody.create(
-                    body.toString(),
-                    MediaType.parse("application/json")
-            );
 
-            Request request = new Request.Builder()
-                    .url(URL)
-                    .post(requestBody)
-                    .build();
+        Executor executor = Executors.newSingleThreadExecutor();
+        ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
 
-            OkHttpClient client = new OkHttpClient();
+        Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse result) {
+                String aiText = result.getText();
+                runOnUiThread(() -> {
 
-            client.newCall(request).enqueue(new Callback() {
+                    String currentChat = txtResponse.getText().toString();
+                    String updatedChat = currentChat.replace("Quick Fit AI: Typing...", "Quick Fit AI: " + aiText);
+                    txtResponse.setText(updatedChat);
+                    scrollToBottom();
+                });
+            }
 
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    runOnUiThread(() ->
-                            txtResponse.append("\n\nERROR: " + e.getMessage()));
-                }
+            @Override
+            public void onFailure(Throwable t) {
+                runOnUiThread(() -> {
+                    Log.e("QUICK_FIT_ERROR", "Error detail: ", t);
+                    txtResponse.append("\nActual Error: " + t.getLocalizedMessage());
+                    txtResponse.append("\nError: Could not connect to AI.");
+                });
+            }
+        }, executor);
+    }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                    if (!response.isSuccessful()) {
-                        runOnUiThread(() ->
-                                txtResponse.append("\n\nHTTP ERROR: " + response.code()));
-                        return;
-                    }
-
-                    String res = response.body().string();
-
-                    try {
-                        JSONObject json = new JSONObject(res);
-                        JSONArray candidates = json.getJSONArray("candidates");
-                        JSONObject content = candidates.getJSONObject(0)
-                                .getJSONObject("content");
-                        JSONArray parts = content.getJSONArray("parts");
-                        String reply = parts.getJSONObject(0).getString("text");
-
-                        runOnUiThread(() ->
-                                txtResponse.append("\n\nAI: " + reply));
-
-                    } catch (Exception e) {
-                        runOnUiThread(() ->
-                                txtResponse.append("\n\nParse Error"));
-                    }
-                }
-            });
-
-        } catch (Exception e) {
-            txtResponse.append("\n\nError building request");
-        }
+    private void scrollToBottom() {
+        chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
 }

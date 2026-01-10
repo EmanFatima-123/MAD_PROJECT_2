@@ -1,15 +1,16 @@
 package com.example.fitness_splash;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
@@ -26,14 +27,31 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
+                .inflate(android.R.layout.simple_list_item_2, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ChatMessage model = list.get(position);
-        holder.text.setText(model.getMessage());
+
+        // Show sender name + message
+        holder.senderName.setText(model.getSenderId().equals(currentUserId) ? "You" : "Friend");
+        holder.messageText.setText(model.getMessage());
+
+        // Align messages: current user right, other left
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.itemView.getLayoutParams();
+        if (model.getSenderId().equals(currentUserId)) {
+            params.gravity = Gravity.END;
+            holder.itemView.setLayoutParams(params);
+            holder.senderName.setGravity(Gravity.END);
+            holder.messageText.setGravity(Gravity.END);
+        } else {
+            params.gravity = Gravity.START;
+            holder.itemView.setLayoutParams(params);
+            holder.senderName.setGravity(Gravity.START);
+            holder.messageText.setGravity(Gravity.START);
+        }
     }
 
     @Override
@@ -42,10 +60,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView text;
+        TextView senderName, messageText;
+
         ViewHolder(View itemView) {
             super(itemView);
-            text = itemView.findViewById(android.R.id.text1);
+            senderName = itemView.findViewById(android.R.id.text1);
+            messageText = itemView.findViewById(android.R.id.text2);
         }
     }
 }
+
