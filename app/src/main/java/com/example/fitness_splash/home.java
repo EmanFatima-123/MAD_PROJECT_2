@@ -44,12 +44,12 @@ public class home extends AppCompatActivity {
         btnMenu = findViewById(R.id.btnMenu);
         recyclerView = findViewById(R.id.recyclerWorkouts);
 
-        // Ads ko start karein
+
         MobileAds.initialize(this, initializationStatus -> {});
 
-        // Ad ko background mein load karna shuru karein
+
         loadMyAd();
-        // Initialize data
+
         workouts = new ArrayList<>();
         workouts.add("Chest Workout");
         workouts.add("Arms Workout");
@@ -96,8 +96,11 @@ public class home extends AppCompatActivity {
             } else if (id == R.id.nav_qr) {
                 startActivity(new Intent(this, qrscanner.class));
             } else if (id == R.id.nav_logout) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(this, login.class));
+                FirebaseAuth.getInstance().signOut(); // Session khatam
+                Intent intent = new Intent(home.this, login.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             } else if (id == R.id.nav_ai) {
                 startActivity(new Intent(this, chatbot.class));
             } else if (id == R.id.nav_chat) {
@@ -106,13 +109,13 @@ public class home extends AppCompatActivity {
                 startActivity(intent);
             } else if (id == R.id.nav_ad) {
                 if (mInterstitialAd != null) {
-                    // Ad dikhao!
+
                     mInterstitialAd.show(home.this);
-                    // Ad dikhne ke baad naya load kar lein taaki dobara bhi kaam kare
+
                     loadMyAd();
                 } else {
                     Toast.makeText(this, "Ad is still loading, please wait...", Toast.LENGTH_SHORT).show();
-                    loadMyAd(); // Phir se try karein
+                    loadMyAd();
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START);
