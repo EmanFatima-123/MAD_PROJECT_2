@@ -35,6 +35,8 @@ public class chat extends AppCompatActivity {
         msgEdit = findViewById(R.id.messageEdit);
         sendBtn = findViewById(R.id.sendBtn);
 
+
+
         String receiverId = getIntent().getStringExtra("receiverId");
         String senderId = FirebaseAuth.getInstance().getUid();
 
